@@ -1,0 +1,36 @@
+### ---------------------------------------------------------------------------
+### RETRIEVE ROUTING TABLE FROM DEVICE
+### ---------------------------------------------------------------------------
+- hosts: all
+  connection: local
+  gather_facts: False
+  become: False
+  roles: 
+    - juniper.junos
+  vars:
+    provider_info:
+      host: "{{ inventory_hostname }}"
+      user: "automation"
+      passwd: "juniper123"
+  tasks:
+
+    - name: "### RETRIEVE ROUTE TABLE WITH NETCONF ###"
+      juniper_junos_rpc:
+        # define remote device parameters
+        host: "{{ ansible_host }}"
+        user: "{{ provider_info.user }}"
+        passwd: "{{ provider_info.passwd }}"
+
+        # define our request
+        rpc: get_route_information
+        kwargs:
+          table: redtail.inet.0
+          extensive: True
+
+      # save the output of our task to a new variable called route_table
+      register: route_table
+
+    - name: "### PRINT THE RESULT TO CONSOLE ###"
+      debug:
+        msg: "{{ route_table }}"
+      when: route_table is defined
